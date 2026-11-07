@@ -36,7 +36,7 @@ memory maps, registers, timers, and I/O).
 
 ## Roadmap
 
-- [ ] **1. Project setup**: git repo, `.gitignore`, `Makefile`, compiler warnings (`-Wall -Wextra -Werror`)
+- [X] **1. Project setup**: git repo, `.gitignore`, `Makefile`, compiler warnings (`-Wall -Wextra -Werror`)
 - [ ] **2. Machine state**: define a struct holding memory, registers, `I`, `PC`, stack, SP, timers, display, and keypad
 - [ ] **3. Initialization**: zero the state, set `PC = 0x200`, load the built-in font into low memory
 - [ ] **4. ROM loading**: read a ROM file into memory starting at `0x200`, with size checks

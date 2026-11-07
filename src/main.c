@@ -1,7 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "chip8.h"
 
+static chip8_machine machine;
+
 int main(void) {
-    printf("Hello World\n");
+    machine_init(&machine);
     return 0;
 }

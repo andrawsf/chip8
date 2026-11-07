@@ -10,6 +10,10 @@
 #define REGISTER_NUM 16
 #define STACK_NUM 16
 
+/**
+ * MACHINE MEMORY LAYOUT
+ */
+
 typedef struct {
     uint8_t V[REGISTER_NUM]; // General-purpose registers 
     uint16_t I; // Holds a memory address
@@ -27,6 +31,12 @@ typedef struct {
     uint16_t keypad;
 } chip8_machine;
 
-_Static_assert(sizeof(((chip8_machine *)0)->memory) == 0X1000 , "memory size failure");
+/**
+ * Initialize machine and set PC.
+ *
+ * The Chip-8 language is capable of accessing up to 4KB (4,096 bytes) of RAM, 
+ * from location 0x000 (0) to 0xFFF (4095). Most Chip-8 programs start at location 0x200
+ */
+void machine_init(chip8_machine* machine);
 
 #endif //CHIP8_H

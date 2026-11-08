@@ -3,6 +3,8 @@
 static chip8_machine machine;
 
 int main(void) {
-    machine_init(&machine);
+    if (machine_init(&machine) != CHIP8_OK) {
+        return 1;
+    }
     return 0;
 }

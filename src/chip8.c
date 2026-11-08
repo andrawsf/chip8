@@ -28,11 +28,12 @@ static const uint8_t display_table[FONT_CHAR_COUNT][FONT_CHAR_BYTES] = {
 
 /**
  * Reset the machine to its power-on state: everything zeroed, PC at the
- * start of program memory (0x200). Caller owns the storage.
+ * start of program memory (0x200), 0x050-0x09F is used for fonts. 
+ * Caller owns the storage.
  */
-void machine_init(chip8_machine* machine) {
+chip8_status machine_init(chip8_machine* machine) {
     if (machine == NULL) {
-        return;
+        return CHIP8_ERR_INVALID_MACHINE;
     }
 
     // Zero first, then set non-zero fields. If we set the PC first, the
@@ -43,4 +44,24 @@ void machine_init(chip8_machine* machine) {
 
     // Set the font memory
     memcpy(&machine->memory[FONT_START], display_table, sizeof(display_table));
+    return CHIP8_OK;
+}
+
+/**
+ * Copy a ROM image into program memory (0x200-0xFFF). See chip8.h.
+ */
+chip8_status machine_load_rom(chip8_machine* machine, const uint8_t* byte_array, size_t byte_array_size) {
+    // Pointer checks first: if a pointer is bad, the size is meaningless.
+    if (machine == NULL) {
+        return CHIP8_ERR_INVALID_MACHINE;
+    }
+    if (byte_array == NULL) {
+        return CHIP8_ERR_INVALID_INPUT;
+    }
+    if (byte_array_size > (MEMORY_SIZE - PROGRAM_START)) {
+        return CHIP8_ERR_ROM_TOO_LARGE;
+    }
+
+    memcpy(&machine->memory[PROGRAM_START], byte_array, byte_array_size);
+    return CHIP8_OK;
 }

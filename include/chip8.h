@@ -1,6 +1,7 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define MEMORY_SIZE 0X1000
@@ -9,6 +10,13 @@
 #define DISPLAY_NUM ((DISPLAY_WIDTH * DISPLAY_HEIGHT) / 8)
 #define REGISTER_NUM 16
 #define STACK_NUM 16
+
+typedef enum {
+    CHIP8_OK,
+    CHIP8_ERR_INVALID_MACHINE,
+    CHIP8_ERR_ROM_TOO_LARGE,
+    CHIP8_ERR_INVALID_INPUT
+} chip8_status;
 
 /**
  * MACHINE MEMORY LAYOUT
@@ -32,11 +40,23 @@ typedef struct {
 } chip8_machine;
 
 /**
- * Initialize machine and set PC.
+ * Reset the machine to its power-on state: everything zeroed, font loaded
+ * at 0x050-0x09F, PC set to 0x200. Caller owns the storage.
  *
- * The Chip-8 language is capable of accessing up to 4KB (4,096 bytes) of RAM, 
- * from location 0x000 (0) to 0xFFF (4095). Most Chip-8 programs start at location 0x200
+ * Returns CHIP8_OK, or CHIP8_ERR_INVALID_MACHINE if machine is NULL.
  */
-void machine_init(chip8_machine* machine);
+chip8_status machine_init(chip8_machine* machine);
+
+/**
+ * Copy a ROM image into program memory starting at 0x200. Program memory
+ * runs 0x200-0xFFF, so the largest ROM is 0xE00 (3584) bytes. On any error
+ * the machine is left unchanged.
+ *
+ * Returns CHIP8_OK, or:
+ *   CHIP8_ERR_INVALID_MACHINE  machine is NULL
+ *   CHIP8_ERR_INVALID_INPUT    byte_array is NULL
+ *   CHIP8_ERR_ROM_TOO_LARGE    byte_array_size > 3584
+ */
+chip8_status machine_load_rom(chip8_machine* machine, const uint8_t* byte_array, size_t byte_array_size);
 
 #endif //CHIP8_H

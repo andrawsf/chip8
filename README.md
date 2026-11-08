@@ -39,7 +39,7 @@ memory maps, registers, timers, and I/O).
 - [X] **1. Project setup**: git repo, `.gitignore`, `Makefile`, compiler warnings (`-Wall -Wextra -Werror`)
 - [X] **2. Machine state**: define a struct holding memory, registers, `I`, `PC`, stack, SP, timers, display, and keypad
 - [X] **3. Initialization**: zero the state, set `PC = 0x200`, load the built-in font into low memory
-- [ ] **4. ROM loading**: read a ROM file into memory starting at `0x200`, with size checks
+- [X] **4. ROM loading**: read a ROM file into memory starting at `0x200`, with size checks
 - [ ] **5. Fetch**: read two bytes at `PC`, combine them into a 16-bit opcode, then advance `PC`
 - [ ] **6. Decode & execute**: switch on the top nibble and extract `X`, `Y`, `N`, `NN`, and `NNN` with masks
 - [ ] **7. Core opcodes first**: `00E0` (clear), `1NNN` (jump), `6XNN` (set), `7XNN` (add), `ANNN` (set I), `DXYN` (draw). These are enough to run the IBM logo ROM

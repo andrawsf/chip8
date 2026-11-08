@@ -4,7 +4,7 @@ CPPFLAGS = -Iinclude
 
 .PHONY: all test clean
 
-all: build/chip8
+all: build/chip8 test
 
 build/chip8: src/* include/*
 	mkdir -p build

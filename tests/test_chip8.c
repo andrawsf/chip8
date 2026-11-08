@@ -42,7 +42,11 @@ void test_init_clears_memory(void) {
 
     machine_init(&machine);
 
-    for (int i = 0; i < MEMORY_SIZE; i++) {
+    for (int i = 0; i < 0x050; i++) {
+        assert(machine.memory[i] == 0);
+    }
+    // skip the font area
+    for (int i = 0x100; i < MEMORY_SIZE; i++) {
         assert(machine.memory[i] == 0);
     }
 }
@@ -84,6 +88,30 @@ void test_init_clears_keypad(void) {
     assert(machine.keypad == 0);
 }
 
+void test_init_font_digit_0(void) {
+    make_dirty(&machine);
+
+    machine_init(&machine);
+
+    assert(machine.memory[0x050] == 0xF0);
+    assert(machine.memory[0x051] == 0x90);
+    assert(machine.memory[0x052] == 0x90);
+    assert(machine.memory[0x053] == 0x90);
+    assert(machine.memory[0x054] == 0xF0);
+}
+
+void test_init_font_digit_f(void) {
+    make_dirty(&machine);
+
+    machine_init(&machine);
+
+    assert(machine.memory[0x050 + 0xF * 5] == 0xF0);
+    assert(machine.memory[0x051 + 0xF * 5] == 0x80);
+    assert(machine.memory[0x052 + 0xF * 5] == 0xF0);
+    assert(machine.memory[0x053 + 0xF * 5] == 0x80);
+    assert(machine.memory[0x054 + 0xF * 5] == 0x80);
+}
+
 int main(void) {
     test_init_PC_start();
     test_init_clears_registers();
@@ -92,6 +120,8 @@ int main(void) {
     test_init_clears_timers();
     test_init_clears_display();
     test_init_clears_keypad();
+    test_init_font_digit_0();
+    test_init_font_digit_f();
 
     printf("All tests passed!\n");
     return 0;

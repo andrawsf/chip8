@@ -38,7 +38,7 @@ memory maps, registers, timers, and I/O).
 
 - [X] **1. Project setup**: git repo, `.gitignore`, `Makefile`, compiler warnings (`-Wall -Wextra -Werror`)
 - [X] **2. Machine state**: define a struct holding memory, registers, `I`, `PC`, stack, SP, timers, display, and keypad
-- [ ] **3. Initialization**: zero the state, set `PC = 0x200`, load the built-in font into low memory
+- [X] **3. Initialization**: zero the state, set `PC = 0x200`, load the built-in font into low memory
 - [ ] **4. ROM loading**: read a ROM file into memory starting at `0x200`, with size checks
 - [ ] **5. Fetch**: read two bytes at `PC`, combine them into a 16-bit opcode, then advance `PC`
 - [ ] **6. Decode & execute**: switch on the top nibble and extract `X`, `Y`, `N`, `NN`, and `NNN` with masks

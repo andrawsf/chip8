@@ -191,6 +191,37 @@ void test_rom_load_huge_size_not_truncated(void) {
     assert(ret_val == CHIP8_ERR_ROM_TOO_LARGE);
 }
 
+void test_fetch_at_0x200(void) {
+    machine_init(&machine);
+    machine.memory[0x200] = 0x12;
+    machine.memory[0x201] = 0x34;
+
+    uint16_t byte = 0;
+    ret_val = machine_fetch(&machine, &byte);
+
+    assert(ret_val == CHIP8_OK);
+    assert(byte == 0x1234);
+    assert(machine.registers.program_counter == 0x202);
+}
+
+void test_fetch_out_of_bounds(void) {
+    machine_init(&machine);
+    uint16_t byte = 0;
+    // set before the program start
+    machine.registers.program_counter = 0x1FF;
+    chip8_status ret_val = machine_fetch(&machine, &byte);
+
+    assert(ret_val == CHIP8_ERR_OUT_OF_BOUNDS);
+    assert(byte == 0x0);
+
+    // set after memory out of bounds
+    machine.registers.program_counter = 0xFFF;
+    ret_val = machine_fetch(&machine, &byte);
+
+    assert(ret_val == CHIP8_ERR_OUT_OF_BOUNDS);
+    assert(byte == 0x0);
+}
+
 int main(void) {
     test_init_PC_start();
     test_init_clears_registers();
@@ -208,6 +239,8 @@ int main(void) {
     test_rom_load_max_size_fits();
     test_rom_load_one_byte_too_large();
     test_rom_load_huge_size_not_truncated();
+    test_fetch_at_0x200();
+    test_fetch_out_of_bounds();
 
     printf("All tests passed!\n");
     return 0;

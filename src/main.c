@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     size_t bytes_read = fread(read_buffer, sizeof(char), READ_SIZE, file_ptr);
     fclose(file_ptr);
 
-    status |= machine_load_rom(&machine, read_buffer, bytes_read);
+    status = machine_load_rom(&machine, read_buffer, bytes_read);
     machine_display_error(status);
     return status;
 }

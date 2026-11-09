@@ -17,7 +17,8 @@ typedef enum {
     CHIP8_OK,
     CHIP8_ERR_INVALID_MACHINE,
     CHIP8_ERR_ROM_TOO_LARGE,
-    CHIP8_ERR_INVALID_INPUT
+    CHIP8_ERR_INVALID_INPUT,
+    CHIP8_ERR_OUT_OF_BOUNDS
 } chip8_status;
 
 /**
@@ -65,5 +66,15 @@ chip8_status machine_load_rom(chip8_machine* machine, const uint8_t* byte_array,
  * Prints out the error status
  */
 void machine_display_error(chip8_status status);
+
+/**
+ * Fetch command which takes the two next areas from memory and then increments
+ * the PC
+ *
+ * Returns CHIP8_OK, or:
+ *   CHIP8_ERR_INVALID_MACHINE  machine is NULL
+ *   CHIP8_ERR_OUT_OF_BOUNDS    PC is out of bounds
+ */
+chip8_status machine_fetch(chip8_machine* machine, uint16_t* out);
 
 #endif //CHIP8_H

@@ -5,6 +5,7 @@
 #define FONT_START       0x050
 #define FONT_CHAR_COUNT  16
 #define FONT_CHAR_BYTES  5
+#define BITS_PER_BYTE    8
 
 static const uint8_t display_table[FONT_CHAR_COUNT][FONT_CHAR_BYTES] = {
     {0xF0, 0x90, 0x90, 0x90, 0xF0}, // 0
@@ -85,4 +86,26 @@ void machine_display_error(chip8_status status) {
         default:
             printf("not a valid status\n");
     }
+}
+
+/**
+ * Fetch command which takes the two next areas from memory and then increments
+ * the PC
+ *
+ * Returns unit16_t
+ */
+chip8_status machine_fetch(chip8_machine* machine, uint16_t* out) {
+    if (machine == NULL) {
+        return CHIP8_ERR_INVALID_MACHINE;
+    }
+    if (out == NULL) {
+        return CHIP8_ERR_INVALID_INPUT;
+    }
+    if (machine->registers.program_counter > MEMORY_SIZE - 2 || machine->registers.program_counter < PROGRAM_START) {
+        return CHIP8_ERR_OUT_OF_BOUNDS;
+    }
+
+    *out = machine->memory[machine->registers.program_counter++] << BITS_PER_BYTE;
+    *out |= machine->memory[machine->registers.program_counter++];
+    return CHIP8_OK;
 }

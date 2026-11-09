@@ -41,7 +41,7 @@ memory maps, registers, timers, and I/O).
 - [X] **3. Initialization**: zero the state, set `PC = 0x200`, load the built-in font into low memory
 - [X] **4. ROM loading**: read a ROM file into memory starting at `0x200`, with size checks
 - [X] **5. Fetch**: read two bytes at `PC`, combine them into a 16-bit opcode, then advance `PC`
-- [ ] **6. Decode & execute**: switch on the top nibble and extract `X`, `Y`, `N`, `NN`, and `NNN` with masks
+- [X] **6. Decode & execute**: switch on the top nibble and extract `X`, `Y`, `N`, `NN`, and `NNN` with masks
 - [ ] **7. Core opcodes first**: `00E0` (clear), `1NNN` (jump), `6XNN` (set), `7XNN` (add), `ANNN` (set I), `DXYN` (draw). These are enough to run the IBM logo ROM
 - [ ] **8. Display output**: render the 64×32 framebuffer (terminal first, SDL optional)
 - [ ] **9. Remaining opcodes**: subroutines, conditionals, arithmetic and logic (`8XYN`), timers, memory ops, and keypad

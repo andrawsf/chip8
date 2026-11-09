@@ -18,8 +18,63 @@ typedef enum {
     CHIP8_ERR_INVALID_MACHINE,
     CHIP8_ERR_ROM_TOO_LARGE,
     CHIP8_ERR_INVALID_INPUT,
-    CHIP8_ERR_OUT_OF_BOUNDS
+    CHIP8_ERR_OUT_OF_BOUNDS,
+    CHIP8_ERR_UNKNOWN_OPCODE
 } chip8_status;
+
+/* OPCODE LAYOUT
+ * Every CHIP-8 instruction is 16 bits = 4 nibbles (hex digits), named:
+ *
+ * opcode 0xD123:
+ * 
+ *   D      1      2      3
+ *   ↑      ↑      ↑      ↑
+ *  type    X      Y      N
+ *               └─NN─┘
+ *        └────NNN────┘
+ * 
+ * ┌───────┬──────────────┬────────────────────────────┬────────────────┐
+ * │ Field │ Bits         │ Meaning                    │ Example 0xD123 │
+ * ├───────┼──────────────┼────────────────────────────┼────────────────┤
+ * │ type  │ top nibble   │ which instruction group    │ 0xD            │
+ * ├───────┼──────────────┼────────────────────────────┼────────────────┤
+ * │ X     │ 2nd nibble   │ a register index, VX       │ 0x1            │
+ * ├───────┼──────────────┼────────────────────────────┼────────────────┤
+ * │ Y     │ 3rd nibble   │ another register index, VY │ 0x2            │
+ * ├───────┼──────────────┼────────────────────────────┼────────────────┤
+ * │ N     │ last nibble  │ a 4-bit number             │ 0x3            │
+ * ├───────┼──────────────┼────────────────────────────┼────────────────┤
+ * │ NN    │ last byte    │ an 8-bit number            │ 0x23           │
+ * ├───────┼──────────────┼────────────────────────────┼────────────────┤
+ * │ NNN   │ last 12 bits │ an address                 │ 0x123          │
+ * └───────┴──────────────┴────────────────────────────┴────────────────┘
+ *
+ * PORTABILITY: bitfield layout is implementation-defined. This union assumes
+ * the compiler allocates bitfields starting from the least significant bit
+ * (GCC/Clang on little-endian targets), so N is the lowest nibble and type the
+ * highest. Write the opcode to `raw`, then read whichever view you need.
+ * The size is checked below at compile time; the bit order is checked by the
+ * test_opcode_* unit tests, which compare against portable mask/shift results.
+ */
+typedef union {
+    uint16_t raw;
+    struct {
+        uint16_t N       : 4; // last nibble
+        uint16_t Y       : 4; // 3rd nibble
+        uint16_t X       : 4; // 2nd nibble
+        uint16_t type    : 4; // 1st nibble
+    } nib;
+    struct {
+        uint16_t NN      : 8; // low byte
+        uint16_t unused  : 8; // unused
+    } byte;
+    struct {
+        uint16_t NNN     : 12;// low 12 bits
+        uint16_t unused  : 4; // unused
+    } addr;
+} chip8_opcode;
+
+_Static_assert(sizeof(chip8_opcode) == 2, "chip8_opcode must pack into 16 bits");
 
 /**
  * MACHINE MEMORY LAYOUT
@@ -68,13 +123,29 @@ chip8_status machine_load_rom(chip8_machine* machine, const uint8_t* byte_array,
 void machine_display_error(chip8_status status);
 
 /**
- * Fetch command which takes the two next areas from memory and then increments
- * the PC
+ * Read the next instruction: the two bytes at PC, combined big-endian
+ * (memory[PC] is the high byte), into *out. Then advance PC by 2.
+ * Valid PC range is 0x200-0xFFE (both bytes must lie inside memory).
+ * On any error, *out and PC are left unchanged.
  *
  * Returns CHIP8_OK, or:
  *   CHIP8_ERR_INVALID_MACHINE  machine is NULL
- *   CHIP8_ERR_OUT_OF_BOUNDS    PC is out of bounds
+ *   CHIP8_ERR_INVALID_INPUT    out is NULL
+ *   CHIP8_ERR_OUT_OF_BOUNDS    PC < 0x200 or PC > 0xFFE
  */
 chip8_status machine_fetch(chip8_machine* machine, uint16_t* out);
+
+/**
+ * Execute one already-fetched instruction. Does not fetch or advance PC
+ * itself (jumps set PC directly).
+ *
+ * Implemented: 00E0 (clear screen), 1NNN (jump), 6XNN (VX = NN),
+ *              7XNN (VX += NN, wraps, VF unchanged), ANNN (I = NNN)
+ *
+ * Returns CHIP8_OK, or:
+ *   CHIP8_ERR_INVALID_MACHINE  machine is NULL
+ *   CHIP8_ERR_UNKNOWN_OPCODE   opcode not implemented / not a valid instruction
+ */
+chip8_status machine_execute(chip8_machine* machine, chip8_opcode opcode);
 
 #endif //CHIP8_H

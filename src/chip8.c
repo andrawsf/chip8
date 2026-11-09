@@ -89,10 +89,7 @@ void machine_display_error(chip8_status status) {
 }
 
 /**
- * Fetch command which takes the two next areas from memory and then increments
- * the PC
- *
- * Returns unit16_t
+ * Read the big-endian opcode at PC and advance PC by 2. See chip8.h.
  */
 chip8_status machine_fetch(chip8_machine* machine, uint16_t* out) {
     if (machine == NULL) {
@@ -107,5 +104,44 @@ chip8_status machine_fetch(chip8_machine* machine, uint16_t* out) {
 
     *out = machine->memory[machine->registers.program_counter++] << BITS_PER_BYTE;
     *out |= machine->memory[machine->registers.program_counter++];
+    return CHIP8_OK;
+}
+
+/**
+ * Execute one decoded instruction. See chip8.h for the supported opcodes.
+ */
+chip8_status machine_execute(chip8_machine* machine, chip8_opcode opcode) {
+    if (machine == NULL) {
+        return CHIP8_ERR_INVALID_MACHINE;
+    }
+
+    switch(opcode.nib.type) {
+        case 0x0:
+            // Type 0 holds several fixed instructions, so match the whole
+            // opcode, not just the low byte (0FE0 is not 00E0).
+            switch (opcode.raw) {
+                case 0x00E0: // clear screen
+                    memset(machine->display, 0, sizeof(machine->display));
+                    break;
+                default:
+                    return CHIP8_ERR_UNKNOWN_OPCODE;
+            }
+            break;
+        case 0X1:
+            machine->registers.program_counter = opcode.addr.NNN;
+            break;
+        case 0X6:
+            machine->registers.V[opcode.nib.X] = opcode.byte.NN;
+            break;
+        case 0X7:
+            machine->registers.V[opcode.nib.X] += opcode.byte.NN;
+            break;
+        case 0XA:
+            machine->registers.I = opcode.addr.NNN;
+            break;
+        default:
+            return CHIP8_ERR_UNKNOWN_OPCODE;
+    }
+
     return CHIP8_OK;
 }

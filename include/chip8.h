@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 #define MEMORY_SIZE 0X1000
+#define PROGRAM_START 0x200
+
 #define DISPLAY_WIDTH 64
 #define DISPLAY_HEIGHT 32
 #define DISPLAY_NUM ((DISPLAY_WIDTH * DISPLAY_HEIGHT) / 8)
@@ -58,5 +60,10 @@ chip8_status machine_init(chip8_machine* machine);
  *   CHIP8_ERR_ROM_TOO_LARGE    byte_array_size > 3584
  */
 chip8_status machine_load_rom(chip8_machine* machine, const uint8_t* byte_array, size_t byte_array_size);
+
+/**
+ * Prints out the error status
+ */
+void machine_display_error(chip8_status status);
 
 #endif //CHIP8_H

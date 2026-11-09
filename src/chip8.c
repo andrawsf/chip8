@@ -1,7 +1,6 @@
 #include <string.h>
+#include <stdio.h>
 #include "chip8.h"
-
-#define PROGRAM_START 0x200
 
 #define FONT_START       0x050
 #define FONT_CHAR_COUNT  16
@@ -64,4 +63,26 @@ chip8_status machine_load_rom(chip8_machine* machine, const uint8_t* byte_array,
 
     memcpy(&machine->memory[PROGRAM_START], byte_array, byte_array_size);
     return CHIP8_OK;
+}
+
+/**
+ * Prints out the error status
+ */
+void machine_display_error(chip8_status status) {
+    switch (status) {
+        case CHIP8_OK:
+            printf("chip8 ok\n");
+            break;
+        case CHIP8_ERR_INVALID_MACHINE:
+            printf("Invalid machine provided\n");
+            break;
+        case CHIP8_ERR_ROM_TOO_LARGE:
+            printf("ROM too large\n");
+            break;
+        case CHIP8_ERR_INVALID_INPUT:
+            printf("Invalid input\n");
+            break;
+        default:
+            printf("not a valid status\n");
+    }
 }
